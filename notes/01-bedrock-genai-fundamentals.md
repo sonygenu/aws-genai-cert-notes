@@ -184,3 +184,78 @@ This restricts a user to only invoke Claude models — not Titan, not Stable Dif
 | Model evaluation | Per model call during evaluation |
 
 **Key exam point:** You are charged for BOTH input AND output tokens separately. A long prompt with a short answer costs more on input. A short prompt with a long response costs more on output.
+
+### Model Inference Parameters
+
+| Parameter | What it controls | Range | Low value | High value |
+|-----------|-----------------|-------|-----------|------------|
+| **Temperature** | Randomness/creativity of output | 0.0 - 1.0 | Deterministic, factual, predictable | Creative, varied, surprising |
+| **Top P** (nucleus sampling) | Cumulative probability threshold — model picks from tokens whose combined probability ≥ P | 0.0 - 1.0 | Only the most likely tokens considered | Wider pool of tokens considered |
+| **Top K** | Number of top tokens to consider at each step | 1 - 500 | Only top 1 token (greedy, deterministic) | Many candidates (more diverse output) |
+
+**Temperature:**
+- `0.0` → Always picks the most probable next token. Same input = same output. Use for factual Q&A, extraction, classification.
+- `1.0` → More random selection. Use for creative writing, brainstorming, varied responses.
+
+**Top P (Nucleus Sampling):**
+- `0.1` → Only considers tokens in the top 10% of probability mass. Very focused.
+- `0.9` → Considers tokens in the top 90% of probability mass. Broader variety.
+- Works by: sort tokens by probability, keep adding tokens until their cumulative probability reaches P, then sample from that subset.
+
+**Top K:**
+- `1` → Greedy decoding. Always picks the single most likely token.
+- `50` → Picks from the top 50 most likely tokens at each step.
+- `250` → Very diverse output, may include low-probability tokens.
+
+**How they interact:**
+- Temperature + Top P are often used together
+- Top K is an alternative to Top P (some models support one or both)
+- Lower temperature + lower Top P = most deterministic (best for factual tasks)
+- Higher temperature + higher Top P = most creative (best for generation tasks)
+
+**Exam tip:** For enterprise RAG/extraction → use low temperature (0.0-0.3). For creative generation → use higher temperature (0.7-1.0).
+
+**Stop Sequence Configuration:**
+- A list of strings that tell the model to stop generating when encountered
+- Example: `["\n\nHuman:", "END", "---"]`
+- Model generates tokens until it produces one of these sequences, then stops
+- Use case: prevent the model from generating beyond a specific boundary (e.g., stop after one answer, don't generate fake follow-up questions)
+
+**Max Tokens / Response Length:**
+- Maximum number of tokens the model will generate in its response
+- Controls output length and cost — shorter = cheaper
+- If the model hits this limit, response is truncated (may be mid-sentence)
+- Set based on task: 100 for classification, 500 for summaries, 4000 for long-form
+
+**Max Reasoning Length:**
+- Specific to models with extended thinking (e.g., Claude with thinking mode)
+- Limits how many tokens the model can use for internal reasoning/chain-of-thought BEFORE producing the final answer
+- Higher = deeper reasoning but slower and more expensive
+- The reasoning tokens are consumed (billed) but not shown to the user in the final response
+
+**Model Reasoning (Extended Thinking):**
+- Some models support a "thinking" step — model reasons through the problem step-by-step internally before answering
+- Improves accuracy on complex tasks (math, logic, multi-step problems)
+- Trade-off: more tokens used (higher cost + latency) for better accuracy
+- In Bedrock: enabled via model parameters or Converse API configuration
+
+**Prompt Caching:**
+- Stores and reuses the processed representation of common prompt prefixes (system prompts, long documents, few-shot examples)
+- If the same prefix is sent repeatedly, Bedrock reuses the cached computation instead of reprocessing it
+- Benefits: faster response (lower latency) + cheaper (cached tokens billed at reduced rate, typically ~90% discount)
+- Use case: when many requests share the same long system prompt or RAG context — e.g., a chatbot with a 5,000-token system instruction
+- Cache is automatic for supported models — no explicit configuration needed
+- Cache has a TTL (time to live) — expires after a period of inactivity
+
+**System Prompt Settings:**
+- A special instruction given to the model that sets its behavior, role, and constraints for the entire conversation
+- Placed before user messages — the model treats it as persistent context
+- Not visible to the end user in the response
+- Examples:
+  - "You are a helpful customer support agent for Acme Corp. Only answer questions about our products."
+  - "Respond in JSON format only. Never include explanations."
+- In Bedrock Converse API: passed as `system` parameter
+- Key points:
+  - System prompts consume input tokens (you're billed for them every turn)
+  - This is where prompt caching helps most — same system prompt across many calls
+  - Can be used to enforce output format, persona, safety rules, topic restrictions
