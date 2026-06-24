@@ -29,6 +29,7 @@ Study notes and hands-on projects for the AWS Generative AI Professional certifi
 
 | Project | Related Section | Description | Status |
 |---------|----------------|-------------|--------|
-| | | | |
+| [Converse API Chatbot](projects/01-converse-api-chatbot/) | Section 1 | Interactive CLI chat using Bedrock Converse API with multi-turn history | ✅ |
+| [PDF Image Extraction + Summarize](projects/02-pdf-image-extraction/) | Section 1 | Extract images from PDF with bounding boxes, summarize with Claude vision | ✅ |
 
 | 19 | Generative AI Architecture Trade Offs | [notes](notes/19-genai-architecture-tradeoffs.md) | ⬜ |
