@@ -20,7 +20,7 @@ REGION = "us-east-1"
 # Models to compare
 MODELS = {
     "Claude Haiku 4.5": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
-    "Nemotron Nano 12B VL": "nvidia.nvidia-nemotron-nano-12b-v2-vl-bf16",
+    "Nemotron Nano 12B VL": "nvidia.nemotron-nano-12b-v2",
 }
 
 PROMPT = """Analyze this image extracted from a PDF document.

@@ -12,7 +12,7 @@ import fitz  # pymupdf
 
 
 REGION = "us-east-1"
-MODEL_ID = "nvidia.nvidia-nemotron-nano-12b-v2-vl-bf16"
+MODEL_ID = "nvidia.nemotron-nano-12b-v2"
 
 PROMPT = """Analyze this image extracted from a PDF document.
 Please provide:
